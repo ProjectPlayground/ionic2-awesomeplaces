@@ -1,3 +1,5 @@
+import {Location} from "../models/location";
+
 export class Place {
 
   constructor(public title: string,
