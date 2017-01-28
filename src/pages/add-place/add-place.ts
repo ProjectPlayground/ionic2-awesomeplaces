@@ -18,6 +18,8 @@ export class AddPlacePage {
 
   locationIsSet = false;
 
+  imageUrl = '';
+
   constructor(private modalCtrl: ModalController,
               private loadingCtrl: LoadingController,
               private toastCtrl: ToastController) {}
@@ -75,7 +77,7 @@ export class AddPlacePage {
     })
       .then(
         imageData => {
-          console.log(imageData);
+          this.imageUrl = imageData
         }
       )
       .catch(
