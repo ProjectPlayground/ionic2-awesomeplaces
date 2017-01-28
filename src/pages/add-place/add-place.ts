@@ -3,8 +3,10 @@ import {NgForm} from "@angular/forms";
 import {ModalController, LoadingController, ToastController} from "ionic-angular";
 import {SetLocationPage} from "../set-location/set-location";
 import {Location} from "../../models/location"
-import {Geolocation, Camera} from "ionic-native";
+import {Geolocation, Camera, File, Entry, FileError} from "ionic-native";
 import {PlacesService} from "../../services/places";
+
+declare var cordova: any;
 
 @Component({
   selector: 'page-add-place',
@@ -90,12 +92,38 @@ export class AddPlacePage {
     })
       .then(
         imageData => {
-          this.imageUrl = imageData
+          const currentName = imageData.replace(/^.*[\\\/]/, '');
+          const path = imageData.replace(/[^\/]*$/, '');
+          //cordova.file.dataDirectory: path to storage directory in the device
+          File.moveFile(path, currentName, cordova.file.dataDirectory, currentName)
+            .then(
+              (data: Entry) => {
+                this.imageUrl = data.nativeURL;
+                Camera.cleanup();
+              }
+            )
+            .catch(
+              (error: FileError) => {
+                this.imageUrl = '';
+                const toast = this.toastCtrl.create({
+                  message: 'Could not save the image',
+                  duration: 2500
+                });
+                toast.present();
+                //clean temporary storage
+                Camera.cleanup();
+              }
+            );
+          this.imageUrl = imageData;
         }
       )
       .catch(
         error =>{
-          console.log(error);
+          const toast = this.toastCtrl.create({
+            message: 'Could not take the picture',
+            duration: 2500
+          });
+          toast.present();
         }
       )
   }
