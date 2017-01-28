@@ -29,17 +29,18 @@ export class PlacesService {
   }
 
   fetchPlaces() {
-    this.storage.get('places')
+    return this.storage.get('places')
       .then(
         (places: Place[]) => {
           this.places = places != null ? places : [];
+          return this.places.slice();
         }
       )
       .catch(
         error => {
           console.log(error);
         }
-      )
+      );
   }
 
   deletePlace(index: number) {
