@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import {NgForm} from "@angular/forms";
-import {ModalController} from "ionic-angular";
+import {ModalController, LoadingController, ToastController} from "ionic-angular";
 import {SetLocationPage} from "../set-location/set-location";
 import {Location} from "../../models/location"
+import {Geolocation} from "ionic-native";
 
 @Component({
   selector: 'page-add-place',
@@ -17,13 +18,39 @@ export class AddPlacePage {
 
   locationIsSet = false;
 
-  constructor(private modalCtrl: ModalController) {}
+  constructor(private modalCtrl: ModalController,
+              private loadingCtrl: LoadingController,
+              private toastCtrl: ToastController) {}
 
   onSubmit(form: NgForm){
     console.log(form.value);
   }
 
-  onLocate(){}
+  onLocate(){
+    const loader = this.loadingCtrl.create({
+      content: 'Getting your location...'
+    });
+    loader.present();
+    Geolocation.getCurrentPosition()
+      .then(
+        location => {
+          loader.dismiss();
+          this.location.lat = location.coords.latitude;
+          this.location.lng = location.coords.longitude;
+          this.locationIsSet = true;
+        }
+      )
+      .catch(
+        error => {
+          loader.dismiss();
+          const toast = this.toastCtrl.create({
+            message: 'Could not get location. Please pick it manually',
+            duration: 2500
+          });
+         toast.present();
+        }
+      );
+  }
 
   onOpenMap(){
     const modal = this.modalCtrl.create(SetLocationPage, {
